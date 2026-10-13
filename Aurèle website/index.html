@@ -294,6 +294,32 @@ p{margin:0}
 .notice{border:1px solid var(--line);padding:14px 16px;font-size:.92rem;color:var(--fg-dim)}
 .sent{display:grid;gap:10px;padding:8px 0}
 .sent h3{font-size:1.7rem}
+/* Assistant chat */
+#pane-ask{display:flex;flex-direction:column;min-height:100%}
+.chat-log{flex:1;display:flex;flex-direction:column;gap:12px;padding-bottom:16px}
+.msg{max-width:88%;padding:11px 14px;font-size:.95rem;line-height:1.5;animation:msgIn .35s var(--ease) both}
+.msg.bot{align-self:flex-start;background:var(--night-3);border:1px solid var(--night-line)}
+.msg.me{align-self:flex-end;background:color-mix(in srgb,var(--aurum) 22%,var(--night-2));border:1px solid color-mix(in srgb,var(--aurum) 40%,transparent)}
+.msg p+p{margin-top:8px}
+.msg b{font-weight:500;color:var(--aurum-hi)}
+@keyframes msgIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.typing{display:inline-flex;gap:5px;padding:14px 16px}
+.typing i{width:6px;height:6px;border-radius:50%;background:var(--moon-dim);animation:blink 1.1s infinite}
+.typing i:nth-child(2){animation-delay:.18s}.typing i:nth-child(3){animation-delay:.36s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.chat-chips{display:flex;flex-wrap:wrap;gap:8px;align-self:flex-start}
+.chat-chips .chip{min-height:34px;font-size:.86rem}
+.mini{display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--night-line)}
+.mini img{width:56px;height:auto;aspect-ratio:4/5;object-fit:cover}
+.mini-name{font-family:var(--display);font-size:1.05rem;text-decoration:none}
+.mini-acts{display:flex;gap:14px;margin-top:4px;font-size:.86rem}
+.mini-acts a,.mini-acts button{color:var(--aurum-hi);text-decoration:underline;text-underline-offset:3px}
+.chat-form{position:sticky;bottom:-20px;display:flex;gap:8px;padding:12px 0 20px;margin-bottom:-20px;background:var(--night-2);border-top:1px solid var(--night-line)}
+.chat-form input{flex:1;min-width:0;min-height:46px;padding:0 12px;background:var(--field);border:1px solid var(--line);color:var(--fg);font-size:.98rem}
+.chat-form input:focus{outline:none;border-color:var(--aurum)}
+.chat-form button{width:46px;min-height:46px;display:grid;place-items:center;background:var(--aurum);color:var(--night)}
+.chat-form button .ic{width:18px;height:18px}
+.chat-note{font-size:.78rem;color:var(--moon-dim);margin-top:-8px;padding-bottom:4px}
 .hours{display:grid;gap:4px;margin-top:22px;padding-top:18px;border-top:1px solid var(--line);font-size:.92rem;color:var(--fg-dim)}
 
 /* Product view */
@@ -403,6 +429,7 @@ p{margin:0}
   <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4.5 5.5h15v10.5H10l-5.5 4v-14.5z"/><path d="M8.5 10.5h7"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+  <symbol id="i-send" viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></symbol>
   <symbol id="i-back" viewBox="0 0 24 24"><path d="M14.5 5.5 8 12l6.5 6.5"/></symbol>
   <symbol id="i-truck" viewBox="0 0 24 24"><path d="M2.5 6.5h11.5v10H2.5zM14 9.5h4.2l3.3 3.4v3.6H14"/><circle cx="6.5" cy="17.5" r="1.6"/><circle cx="17.5" cy="17.5" r="1.6"/></symbol>
   <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20l4.2-1L19.5 7.7l-3.2-3.2L5 15.8 4 20z"/><path d="M14.5 6.3l3.2 3.2"/></symbol>
@@ -587,6 +614,7 @@ p{margin:0}
           <li><button data-concierge="faq-returns">Returns</button></li>
           <li><button data-concierge="faq-warranty">Warranty and service</button></li>
           <li><button data-concierge="faq">Questions</button></li>
+          <li><button data-concierge="ask">Ask Aurèle</button></li>
         </ul>
       </div>
       <div>
@@ -614,7 +642,7 @@ p{margin:0}
   </div>
 </footer>
 
-<button class="concierge-btn" id="concierge-btn" data-concierge="faq"><svg class="ic"><use href="#i-chat"/></svg><span class="cl">Concierge</span></button>
+<button class="concierge-btn" id="concierge-btn" data-concierge="ask"><svg class="ic"><use href="#i-chat"/></svg><span class="cl">Concierge</span></button>
 
 <!-- Layers -->
 <div class="scrim" id="scrim"></div>
@@ -627,7 +655,7 @@ p{margin:0}
       <a href="#watches" data-close>Watches</a>
       <a href="#house" data-close>The house</a>
       <button data-open="wish">Wishlist</button>
-      <button data-concierge="faq">Concierge</button>
+      <button data-concierge="ask">Concierge</button>
     </nav>
   </div>
 </aside>
@@ -661,11 +689,21 @@ p{margin:0}
 <aside class="drawer tone-night" id="concierge" role="dialog" aria-modal="true" aria-labelledby="concierge-title">
   <div class="d-head"><h2 id="concierge-title">Concierge</h2><button class="icon-btn" data-close aria-label="Close concierge"><svg class="ic"><use href="#i-close"/></svg></button></div>
   <div class="tabs" role="tablist">
-    <button class="tab" role="tab" id="tab-faq" aria-controls="pane-faq" aria-selected="true">Questions</button>
+    <button class="tab" role="tab" id="tab-ask" aria-controls="pane-ask" aria-selected="true">Ask Aurèle</button>
+    <button class="tab" role="tab" id="tab-faq" aria-controls="pane-faq" aria-selected="false">Questions</button>
     <button class="tab" role="tab" id="tab-message" aria-controls="pane-message" aria-selected="false">Message us</button>
   </div>
   <div class="d-body">
-    <div id="pane-faq" role="tabpanel" aria-labelledby="tab-faq">
+    <div id="pane-ask" role="tabpanel" aria-labelledby="tab-ask">
+      <div class="chat-log" id="chat-log" aria-live="polite"></div>
+      <form class="chat-form" id="chat-form" autocomplete="off">
+        <label class="sr" for="chat-input">Ask a question</label>
+        <input id="chat-input" placeholder="Ask about a product, delivery, payment…" maxlength="200">
+        <button type="submit" aria-label="Send"><svg class="ic"><use href="#i-send"/></svg></button>
+      </form>
+      <p class="chat-note">Automated assistant. For anything else, use Message us.</p>
+    </div>
+    <div id="pane-faq" role="tabpanel" aria-labelledby="tab-faq" hidden>
       <div class="faq" id="faq"></div>
       <div class="hours"><span>Client advisors answer every day, 10:00 to 22:00 Cairo time.</span><span>Can't find your answer? <button class="text-btn" data-tab="message">Send us a message</button></span></div>
     </div>
@@ -781,7 +819,7 @@ p{margin:0}
     ["faq-engraving", "What can I engrave?", "Up to 20 characters on a watch caseback or the back of a perfume bottle, at no charge. Add your text on the product page before you add the piece to your bag."],
     ["faq-sizing", "How do I choose a bracelet size?", "Measure around your wrist just above the wrist bone and choose that range. We size the bracelet before dispatch and include the spare links."],
     ["faq-fragrance", "How long do the fragrances last?", "The eaux de parfum last 6 to 8 hours on skin, and Nuit, the extrait, lasts 10 hours or more. Every order includes samples of all four Aselya fragrances."],
-    ["faq-payment", "How do I pay?", "This is a demonstration store. Checkout shows the full ordering flow, and no payment is taken."]
+    ["faq-payment", "How do I pay?", "You can pay with cash on delivery, a debit or credit card, or InstaPay. Choose your payment method at checkout."]
   ];
 
   /* ---------- Storage (per viewer convenience only) ---------- */
@@ -1114,17 +1152,144 @@ p{margin:0}
   $("#faq").innerHTML = FAQ.map(([id, q, a]) => `<details id="${id}"><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join("");
   function setTab(which) {
     $$(".tab").forEach(t => t.setAttribute("aria-selected", t.id === `tab-${which}`));
-    $("#pane-faq").hidden = which !== "faq"; $("#pane-message").hidden = which !== "message";
+    ["ask", "faq", "message"].forEach(k => $(`#pane-${k}`).hidden = which !== k);
+    if (which === "ask") { chatStart(); setTimeout(() => $("#chat-input").focus({ preventScroll: true }), 120); scrollChat(); }
   }
   $$(".tab").forEach(t => t.addEventListener("click", () => setTab(t.id.replace("tab-", ""))));
   function openConcierge(what) {
     if (what === "message") setTab("message");
+    else if (what === "ask") setTab("ask");
     else {
       setTab("faq");
       if (what && what.startsWith("faq-")) { $$("#faq details").forEach(d => d.open = d.id === what); }
     }
     openLayer("concierge");
   }
+  /* ---------- Ask Aurèle: scripted assistant ---------- */
+  const chatLog = $("#chat-log");
+  let chatStarted = false, chatBusy = false, lastTopic = null;
+  const norm = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  const has = (t, words) => words.some(w => t.includes(w));
+  const word = (t, words) => words.some(w => new RegExp(`\\b${w}\\b`).test(t));
+  const MAIN_CHIPS = ["Recommend a perfume", "Find a watch", "Delivery and returns", "Payment options", "Track my order"];
+  function scrollChat() { const b = chatLog.closest(".d-body"); if (b) requestAnimationFrame(() => b.scrollTop = b.scrollHeight); }
+  function addMsg(html, who) { const d = document.createElement("div"); d.className = `msg ${who}`; d.innerHTML = html; chatLog.appendChild(d); scrollChat(); return d; }
+  function addChips(chips) {
+    $$(".chat-chips", chatLog).forEach(c => c.remove());
+    if (!chips || !chips.length) return;
+    const d = document.createElement("div"); d.className = "chat-chips";
+    d.innerHTML = chips.map(c => `<button class="chip" data-ask="${esc(c)}">${esc(c)}</button>`).join("");
+    chatLog.appendChild(d); scrollChat();
+  }
+  function mini(p) {
+    return `<div class="mini"><img src="media/${p.img}-sm.webp" alt="" width="700" height="869"><div><a class="mini-name" href="#p-${p.id}">${esc(HOUSE[p.house].name)} ${esc(p.name)}</a><div class="small muted">${esc(p.kind)}, ${fromPrice(p)}</div><div class="mini-acts"><a href="#p-${p.id}">View</a><button data-add="${p.id}">Add to bag</button></div></div></div>`;
+  }
+  function chatStart() {
+    if (chatStarted) return; chatStarted = true;
+    addMsg(`<p>Good evening, and welcome to Aurèle. I can help you choose a perfume or a watch, and answer questions about delivery, payment, engraving or your order.</p><p>What can I help you with?</p>`, "bot");
+    addChips(MAIN_CHIPS);
+  }
+  function findProducts(t) {
+    const names = [["blue lotus", "aselya-blue-lotus"], ["white lotus", "aselya-white-lotus"], ["amber reed", "aselya-amber-reed"], ["amber", "aselya-amber-reed"], ["nuit", "aselya-nuit"], ["extrait", "aselya-nuit"], ["dune", "orvane-dune"], ["mirage", "orvane-mirage"], ["ember", "orvane-ember"], ["rose gold", "orvane-ember"], ["pearl", "orvane-pearl-31"], ["mother of pearl", "orvane-pearl-31"]];
+    const out = [];
+    for (const [k, id] of names) if (t.includes(k) && !out.includes(id)) out.push(id);
+    if (out.includes("aselya-white-lotus") || out.includes("aselya-blue-lotus")) { const i = out.indexOf("aselya-amber-reed"); if (i > -1 && !t.includes("amber")) out.splice(i, 1); }
+    return out.map(byId);
+  }
+  const budgetOf = t => { const m = t.replace(/,/g, "").match(/(?:under|below|less than|max|budget|up to|\$)\s*\$?\s*(\d{2,6})(k)?/); return m ? Number(m[1]) * (m[2] ? 1000 : 1) : null; };
+  function reply(raw) {
+    const t = norm(raw.trim());
+    const faq = id => FAQ.find(f => f[0] === id)[2];
+    const wantsPerfume = has(t, ["perfume", "fragrance", "scent", "parfum", "smell", "cologne", "aselya"]);
+    const wantsWatch = has(t, ["watch", "orvane", "timepiece", "wrist"]);
+    const prods = findProducts(t);
+    const budget = budgetOf(t);
+    // greetings and small talk
+    if (/^(hi|hello|hey|good (morning|evening|afternoon)|salam|assalamu|ahlan|marhaba)\b/.test(t) && t.length < 30) return { html: `<p>Hello! How can I help you today?</p>`, chips: MAIN_CHIPS };
+    if (has(t, ["thank", "thanks", "shukran", "perfect", "great"]) && t.length < 40) return { html: `<p>My pleasure. Is there anything else I can help you with?</p>`, chips: MAIN_CHIPS };
+    // order tracking
+    const orderNo = raw.toUpperCase().match(/AUR-?\s?(\d{6})/);
+    if (orderNo || has(t, ["track", "my order", "order status", "where is my", "where's my"])) {
+      const last = store.get("aurele-last-order", null);
+      if (orderNo) {
+        const no = "AUR-" + orderNo[1];
+        if (last && last.no === no) return { html: `<p>Order <b>${no}</b> is confirmed and being prepared at the atelier. It's due in ${esc(last.city)} by <b>${esc(last.date)}</b>, and the courier will call before delivery.</p><p>Payment: ${esc(last.pay || "Cash on delivery")}.</p>`, chips: ["Delivery and returns", "Talk to a person"] };
+        return { html: `<p>I couldn't find order ${no} on this device. Check the number in your confirmation, or send us a message and an advisor will look it up.</p>`, chips: ["Talk to a person"] };
+      }
+      if (last) return { html: `<p>Your latest order is <b>${esc(last.no)}</b>, due in ${esc(last.city)} by <b>${esc(last.date)}</b>.</p><p>For another order, type its number, like AUR-123456.</p>`, chips: ["Talk to a person"] };
+      lastTopic = "track";
+      return { html: `<p>Of course. What's your order number? It starts with AUR- and is on your order confirmation.</p>`, chips: [] };
+    }
+    // service topics
+    if (has(t, ["human", "person", "agent", "advisor", "someone", "call", "phone", "contact", "talk to", "customer service"])) return { action: "message", html: `<p>I'll pass you to a client advisor. Leave your message on the next tab, and they reply within one working day.</p>`, chips: [] };
+    if (has(t, ["gift", "present", "wrap", "birthday", "anniversary"])) return { html: `<p>Every order is gift-wrapped in an Aurèle box, and you can add a handwritten card at checkout. Popular gifts:</p>${mini(byId("aselya-blue-lotus"))}${mini(byId("orvane-pearl-31"))}`, chips: ["Recommend a perfume", "Find a watch"] };
+    if (has(t, ["pay", "payment", "cash", "card", "visa", "mastercard", "instapay", "meeza", "installment"])) return { html: `<p>You can pay with <b>cash on delivery</b>, a <b>debit or credit card</b> (Visa, Mastercard or Meeza), or <b>InstaPay</b>. You choose your method at checkout.</p>`, chips: ["Delivery and returns", "Recommend a perfume", "Find a watch"] };
+    if (has(t, ["return", "refund", "exchange"])) return { html: `<p>${esc(faq("faq-returns"))}</p>`, chips: ["Delivery and returns", "Talk to a person"] };
+    if (has(t, ["deliver", "shipping", "ship", "courier", "arrive", "how long does", "express"]) && !has(t, ["last", "lasting"])) return { html: `<p>${esc(faq("faq-delivery"))}</p><p>Returns are free within 30 days for unworn watches and unopened fragrances.</p>`, chips: ["Payment options", "Track my order"] };
+    if (has(t, ["warranty", "guarantee", "service", "repair"])) return { html: `<p>${esc(faq("faq-warranty"))}</p>`, chips: ["Find a watch", "Talk to a person"] };
+    if (has(t, ["engrav", "personalis", "personaliz", "initials", "name on"])) return { html: `<p>${esc(faq("faq-engraving"))}</p>`, chips: ["Find a watch", "Recommend a perfume"] };
+    if (has(t, ["size", "sizing", "fit", "wrist", "bracelet", "strap length"]) && !wantsPerfume) return { html: `<p>${esc(faq("faq-sizing"))}</p><p>For smaller wrists, Pearl 31 has a 31 mm case; the other models are 39 mm.</p>`, chips: ["Find a watch"] };
+    if (has(t, ["last", "lasting", "longevity", "how long", "projection", "strong"])) return { html: `<p>${esc(faq("faq-fragrance"))}</p>`, chips: ["Recommend a perfume"] };
+    if (has(t, ["sample", "tester", "try before"])) return { html: `<p>Every order comes with samples of all four Aselya fragrances, so you can try the others at home.</p>`, chips: ["Recommend a perfume"] };
+    if (has(t, ["store", "boutique", "location", "visit", "showroom", "branch"])) return { html: `<p>Aurèle sells online, with private appointments for watch fittings. Send us a message to book one.</p>`, chips: ["Talk to a person"] };
+    // product questions
+    if (prods.length === 1) {
+      const p = prods[0];
+      const extra = p.notes ? `<p>Notes: ${p.notes.map(n => `${n[0].toLowerCase()} ${esc(n[1].toLowerCase())}`).join("; ")}.</p>` : `<p>${esc(p.specs[0][1])}. ${esc(p.specs[2][1])}.</p>`;
+      const prices = p.variants.length > 1 ? p.variants.map(v => `${v.label} ${money(v.price)}`).join(", ") : money(p.variants[0].price);
+      return { html: `<p><b>${esc(HOUSE[p.house].name)} ${esc(p.name)}</b>: ${esc(p.desc)}</p>${extra}<p>Price: ${prices}.</p>${mini(p)}`, chips: p.house === "aselya" ? ["How long does it last?", "Recommend a perfume", "Payment options"] : ["Wrist sizing", "Warranty", "Find a watch"] };
+    }
+    if (prods.length > 1) return { html: `<p>Here they are side by side:</p>${prods.slice(0, 3).map(mini).join("")}`, chips: MAIN_CHIPS.slice(0, 2) };
+    // recommendations
+    const forHer = word(t, ["her", "woman", "women", "wife", "girlfriend", "mother", "mom", "sister", "ladies", "lady", "female"]);
+    const forHim = word(t, ["him", "man", "men", "husband", "boyfriend", "father", "dad", "brother", "male"]);
+    if (wantsPerfume || has(t, ["fresh", "floral", "evening", "night", "warm", "sweet", "oud", "vanilla", "light", "everyday"])) {
+      let pick;
+      if (has(t, ["evening", "night", "oud", "intense", "strong", "dark", "vanilla"])) pick = ["aselya-nuit", "aselya-amber-reed"];
+      else if (has(t, ["warm", "sweet", "honey", "amber", "cozy", "winter"])) pick = ["aselya-amber-reed", "aselya-nuit"];
+      else if (has(t, ["fresh", "light", "everyday", "office", "clean", "summer", "day"])) pick = ["aselya-white-lotus", "aselya-blue-lotus"];
+      else if (forHim) pick = ["aselya-nuit", "aselya-amber-reed"];
+      else if (forHer) pick = ["aselya-blue-lotus", "aselya-white-lotus"];
+      if (pick) return { html: `<p>I'd suggest these two:</p>${pick.map(id => mini(byId(id))).join("")}`, chips: ["How long does it last?", "Payment options"] };
+      lastTopic = "perfume";
+      return { html: `<p>Happy to help. What mood are you after?</p>`, chips: ["Fresh and light", "Floral", "Warm and sweet", "Deep, for evenings"] };
+    }
+    if (wantsWatch || budget || has(t, ["gold", "steel", "leather", "blue", "small", "dress", "everyday watch"])) {
+      let list = P.filter(p => p.house === "orvane");
+      if (budget) list = list.filter(p => p.variants[0].price <= budget);
+      if (has(t, ["leather"])) list = list.filter(p => p.family === "leather");
+      if (has(t, ["steel"]) && !has(t, ["gold"])) list = list.filter(p => p.id === "orvane-mirage" || p.id === "orvane-dune");
+      if (has(t, ["blue"])) list = list.filter(p => p.id === "orvane-mirage");
+      if (forHer || has(t, ["small"])) list = list.filter(p => p.id === "orvane-pearl-31" || p.id === "orvane-dune");
+      else if (forHim) list = list.filter(p => p.id !== "orvane-pearl-31");
+      if (budget && !list.length) { const cheapest = byId("orvane-mirage"); return { html: `<p>Our watches start at ${money(cheapest.variants[0].price)}. Within your budget, Aselya perfumes start at ${money(165)}, or this is our most accessible watch:</p>${mini(cheapest)}`, chips: ["Recommend a perfume", "Payment options"] }; }
+      if (!wantsWatch && !budget && !list.length) list = [];
+      if (list.length && (budget || forHer || forHim || has(t, ["gold", "steel", "leather", "blue", "small"]))) return { html: `<p>${list.length === 1 ? "This one fits:" : "These would suit:"}</p>${list.slice(0, 3).map(mini).join("")}`, chips: ["Wrist sizing", "Engraving", "Payment options"] };
+      lastTopic = "watch";
+      return { html: `<p>Every ORVANE is automatic, with a dune-wave dial. What would you like?</p>`, chips: ["Steel and blue", "Two-tone gold", "Rose gold on leather", "For a smaller wrist"] };
+    }
+    if (lastTopic === "track") return { html: `<p>I need the order number to look it up. It looks like AUR-123456.</p>`, chips: ["Talk to a person"] };
+    return { html: `<p>I'm not sure I understood that. I can help with choosing a perfume or watch, prices, delivery, returns, payment, engraving and orders.</p>`, chips: [...MAIN_CHIPS, "Talk to a person"] };
+  }
+  const ALIASES = { "recommend a perfume": "perfume", "find a watch": "watch", "delivery and returns": "delivery", "payment options": "payment", "track my order": "track my order", "talk to a person": "talk to a person",
+    "fresh and light": "fresh perfume", "floral": "floral perfume for her", "warm and sweet": "warm perfume", "deep, for evenings": "evening perfume", "steel and blue": "blue steel watch",
+    "two-tone gold": "dune", "rose gold on leather": "ember", "for a smaller wrist": "small watch", "how long does it last?": "how long lasting", "wrist sizing": "watch size", "engraving": "engraving", "warranty": "warranty" };
+  function ask(text) {
+    if (chatBusy || !text.trim()) return;
+    chatBusy = true; chatStart();
+    addChips(null);
+    addMsg(esc(text), "me");
+    const r = reply(ALIASES[norm(text)] || text);
+    const typing = addMsg(`<span class="typing" aria-label="Typing"><i></i><i></i><i></i></span>`, "bot");
+    typing.style.padding = "0";
+    setTimeout(() => {
+      typing.remove(); addMsg(r.html, "bot"); addChips(r.chips); chatBusy = false;
+      if (r.action === "message") setTimeout(() => setTab("message"), 1200);
+    }, reduced ? 50 : 650 + Math.min(900, r.html.length * 2));
+  }
+  $("#chat-form").addEventListener("submit", e => { e.preventDefault(); const i = $("#chat-input"); ask(i.value); i.value = ""; });
+  chatLog.addEventListener("click", e => { const c = e.target.closest("[data-ask]"); if (c) ask(c.dataset.ask); });
+
   $("#msg-form").addEventListener("submit", e => {
     e.preventDefault();
     const f = e.target; if (!f.reportValidity()) return;
@@ -1191,7 +1356,10 @@ p{margin:0}
             <div class="field" id="co-gift-wrap" hidden><label for="co-gift-text">Gift card message</label><textarea id="co-gift-text" maxlength="200"></textarea></div>
           </div>
           <div class="co-sec"><h2>Payment</h2>
-            <p class="notice">This is a demonstration store for a fictional brand. No card details are needed and no payment is taken when you place the order.</p>
+            <label class="radio-card"><input type="radio" name="co-pay" value="Cash on delivery" checked><span class="grow"><span>Cash on delivery</span><span class="small muted">Pay the courier when your order arrives</span></span></label>
+            <label class="radio-card"><input type="radio" name="co-pay" value="Debit or credit card"><span class="grow"><span>Debit or credit card</span><span class="small muted">Visa, Mastercard and Meeza, on a secure payment page</span></span></label>
+            <label class="radio-card"><input type="radio" name="co-pay" value="InstaPay"><span class="grow"><span>InstaPay</span><span class="small muted">Transfer instantly from your bank app</span></span></label>
+            <p class="small muted">Demonstration store: no payment details are collected and nothing is charged.</p>
           </div>
           <div class="co-sec" style="border:0;padding-top:0"><button class="btn solid wide" type="submit" id="co-place">Place order</button>
           <p class="small muted" id="co-error" aria-live="polite" style="margin-top:10px"></p></div>
@@ -1213,11 +1381,13 @@ p{margin:0}
   function placeOrder(express) {
     const el = $("#checkout");
     const no = "AUR-" + String(Math.floor(100000 + Math.random() * 900000));
+    const pay = ($("input[name=co-pay]:checked", el) || {}).value || "Cash on delivery";
     const first = $("#co-first").value.trim(), email = $("#co-email").value.trim(), city = $("#co-city").value.trim();
     const engraved = bag.some(l => l.engraving);
     const days = (express ? 1 : 4) + (engraved ? 2 : 0);
     const ship = express ? 35 : 0, total = subtotal() + ship;
     const lines = bag.map(l => lineHTML(l, false)).join("");
+    store.set("aurele-last-order", { no, city, date: workingDaysFrom(days), pay, items: bag.reduce((s, l) => s + l.qty, 0), total });
     bag = []; saveBag(); renderBag();
     el.innerHTML = `
       <div class="page-bar wrap" style="background:var(--night)"><span class="brand" style="font-size:1.1rem">AURÈLE</span><button class="icon-btn" data-close aria-label="Close"><svg class="ic"><use href="#i-close"/></svg></button></div>
@@ -1227,6 +1397,7 @@ p{margin:0}
         <p class="lede">Your order is confirmed. It arrives in ${esc(city)} by ${workingDaysFrom(days)}, gift-wrapped in an Aurèle box. A confirmation would go to ${esc(email)}.</p>
         <div style="border-top:1px solid var(--line);margin-top:8px">${lines}</div>
         <div class="totals"><div class="row"><span>Delivery</span><span>${ship ? money(ship) : "Complimentary"}</span></div><div class="row grand"><span>Total</span><span class="price">${money(total)}</span></div></div>
+        <p class="muted">Payment: ${esc(pay)}${pay === "Cash on delivery" ? `, ${money(total)} due on delivery` : ""}.</p>
         <p class="notice">Demonstration store: no payment was taken and nothing will ship.</p>
         <div class="actions"><button class="btn solid" id="co-done">Continue shopping</button><button class="btn" data-concierge="message">Contact concierge</button></div>
       </div></div>`;
@@ -1309,6 +1480,7 @@ p{margin:0}
     const fl = t.closest("[data-filter]"); if (fl) { const [h, k] = fl.dataset.filter.split(":"); view[h].f = k; renderGrid(h); return; }
     const sg = t.closest("[data-suggest]"); if (sg) { $("#search-input").value = sg.dataset.suggest; runSearch(sg.dataset.suggest); return; }
     const film = t.closest("[data-film]"); if (film) { openFilm(film.dataset.film); return; }
+    const tb = t.closest("[data-tab]"); if (tb) { setTab(tb.dataset.tab); return; }
     const cc = t.closest("[data-concierge]"); if (cc) { if (stack.includes("checkout")) closeLayer("checkout", true); openConcierge(cc.dataset.concierge); return; }
     const op = t.closest("[data-open]"); if (op) { const id = op.dataset.open; if (id === "bag") renderBag(); if (id === "wish") renderWish(); if (id === "search") runSearch($("#search-input").value); openLayer(id); return; }
     if (t.closest("#co-done")) { ["checkout", "product"].forEach(id => stack.includes(id) && closeLayer(id)); return; }
